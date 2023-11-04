@@ -47,13 +47,14 @@ router.post('/detail', async (req, res) => {
   try {
     var sql = "SELECT * FROM kbow.shots WHERE user_id = ? AND shot_date LIKE ?;";
     let insert_value = [req.user.user_id, req.body.date]; 
-
+	console.log(insert_value);
     maria.query(sql, insert_value, (err, result) => {
       if (err) {
         console.log(err);
         res.status(500).json({ error: 'Database query error' });
         return;
       }
+	    console.log(result);
       res.send(result);
     });
   } catch (error) {
@@ -62,5 +63,23 @@ router.post('/detail', async (req, res) => {
   }
 });
 
-
+router.post('/modify', async (req, res) => {
+	try {
+	var sql = "UPDATE kbow.shots SET shot_array = ?, feedback = ? WHERE user_id = ? AND shot_date = ?";
+    let insert_value = [req.body.shots, req.body.feedback, req.user.user_id, req.body.date];
+        console.log(insert_value);
+    maria.query(sql, insert_value, (err, result) => {
+	          if (err) {
+			          console.log(err);
+			          res.status(500).json({ error: 'Database query error' });
+			          return;
+			        }
+	                console.log(result);
+	          res.send(result);
+	        });
+  } catch (error) {
+	      console.log('error', error);
+	      res.status(403).json({ error: 'db error' });
+	    }
+});
 module.exports = router;
