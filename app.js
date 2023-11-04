@@ -10,6 +10,7 @@ var usersRouter = require('./routes/users');
 var kakaoRouter = require('./routes/kakao');
 var boardRouter = require('./routes/board/board_list');
 var shotRouter = require('./routes/shot/shot');
+var groupRouter = require('./routes/group/group')
 var verifyToken = require('./middlewares/verifyToken');
 
 var app = express();
@@ -34,6 +35,9 @@ app.use('/api/board', boardRouter);
 
 app.use('/api/shot', verifyToken);
 app.use('/api/shot', shotRouter);
+
+app.use('/api/group', verifyToken);
+app.use('/api/group', groupRouter);
 
 app.use('/api/kakao', kakaoRouter);
 
