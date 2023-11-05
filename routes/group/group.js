@@ -24,6 +24,25 @@ router.get('/list', async (req, res) => {
   }
 });
 
+router.post('/join', async (req, res) => {
+    const userIdFromToken = req.user.user_id; 
+    try {
+        var sql = "INSERT INTO kbow.group_user (user_id, group_id) VALUE(?,?)";
+        const insert_value = [userIdFromToken, req.body.group_id]
+        maria.query(sql, insert_value, (err, result) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            console.log(result);
+            res.send(result);
+        });
+    } catch (error) {
+        console.log('error', error);
+        res.status(403).json({ error: 'db error' });
+    }
+  });
+
 
 
 
