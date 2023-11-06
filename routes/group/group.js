@@ -28,15 +28,17 @@ router.post('/join', async (req, res) => {
     const userIdFromToken = req.user.user_id; 
 
     try {
-        var sql = "SELECT count(*) FROM kbow.group_user WHERE user_id=? AND group_id=?";
+        var sql = "SELECT COUNT(*) FROM kbow.group_user WHERE user_id=? AND group_id=?";
         const insert_value = [userIdFromToken, req.body.group_id]
         maria.query(sql, insert_value, (err, result) => {
             if (err) {
                 console.log(err);
                 return;
             }
-            console.log(result);
-            res.send(result);
+		if(result[0]['COUNT(*)'] != 0)
+			res.status(409).json({ error : 'duplication error'});
+            console.log(result[0]['COUNT(*)']);
+        
         });
     } catch (error) {
         console.log('error', error);
