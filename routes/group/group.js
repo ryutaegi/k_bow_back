@@ -91,7 +91,8 @@ router.post('/join/public', async (req, res) => {
                 console.log(err);
                 return;
             }
-		if(result[0][0] != req.body.group_password)
+		console.log(result[0]['group_password']);
+		if(result[0]['group_password'] != req.body.group_password)
 			res.status(401).json({ error : 'password error'});
         
         });
