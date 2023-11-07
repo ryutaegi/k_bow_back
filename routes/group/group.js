@@ -24,7 +24,7 @@ router.get('/list', async (req, res) => {
   }
 });
 
-router.post('/join', async (req, res) => {
+router.post('/join/public', async (req, res) => {
     const userIdFromToken = req.user.user_id; 
 
     try {
@@ -38,6 +38,61 @@ router.post('/join', async (req, res) => {
 		if(result[0]['COUNT(*)'] != 0)
 			res.status(409).json({ error : 'duplication error'});
             console.log(result[0]['COUNT(*)']);
+        
+        });
+    } catch (error) {
+        console.log('error', error);
+        res.status(403).json({ error: 'db error' });
+    }
+
+    try {
+        var sql = "INSERT INTO kbow.group_user (user_id, group_id) VALUE(?,?)";
+        const insert_value = [userIdFromToken, req.body.group_id]
+        maria.query(sql, insert_value, (err, result) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            console.log(result);
+            res.send(result);
+        });
+    } catch (error) {
+        console.log('error', error);
+        res.status(403).json({ error: 'db error' });
+    }
+  });
+
+  router.post('/join/private', async (req, res) => {
+    const userIdFromToken = req.user.user_id; 
+
+    try {
+        var sql = "SELECT COUNT(*) FROM kbow.group_user WHERE user_id=? AND group_id=?";
+        const insert_value = [userIdFromToken, req.body.group_id]
+        maria.query(sql, insert_value, (err, result) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+		if(result[0]['COUNT(*)'] != 0)
+			res.status(409).json({ error : 'duplication error'});
+            console.log(result[0]['COUNT(*)']);
+        
+        });
+    } catch (error) {
+        console.log('error', error);
+        res.status(403).json({ error: 'db error' });
+    }
+
+    try {
+        var sql = "SELECT group_password FROM kbow.group_info WHERE group_id=?";
+        const insert_value = [req.body.group_id]
+        maria.query(sql, insert_value, (err, result) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+		if(result[0][0] != req.body.group_password)
+			res.status(401).json({ error : 'password error'});
         
         });
     } catch (error) {
