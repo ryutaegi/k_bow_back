@@ -25,9 +25,14 @@ router.get('/list', async (req, res) => {
 router.get('/join/list', async (req, res) => {
     const userIdFromToken = req.user.user_id;
     try {
-      var sql = "SELECT group_id, group_name, group_description FROM kbow.group_user WHERE user_id=?;";
-      const insert_value = [userIdFromToken];
-      const result = await mariaQuery(sql, insert_value);
+      var sql = "SELECT group_id FROM kbow.group_user WHERE user_id=?;";
+      let insert_value = [userIdFromToken];
+      let result = await mariaQuery(sql, insert_value);
+
+        insert_value = result.map(row => row.group_id);
+	console.log(insert_value);
+	sql = "SELECT group_id, group_name, group_description FROM kbow.group_info WHERE group_id IN (?);";
+      result = await mariaQuery(sql, [insert_value]);
       console.log(result);
       res.send(result);
     } catch (error) {
