@@ -8,8 +8,8 @@ const router = express.Router();
 
 router.post('/save', async (req, res) => {
   try {
-          var sql = "INSERT INTO kbow.shots(user_id, shot_date, shot_array, feedback) VALUES(?,?,?,?)";
-          let insert_value = [req.body.user_id, req.body.date, req.body.shot, req.body.feedback]; 
+          var sql = "INSERT INTO kbow.shots(user_id, shot_date, shot_array, feedback, shot_count, target_count) VALUES(?,?,?,?,?,?)";
+          let insert_value = [req.body.user_id, req.body.date, req.body.shot, req.body.feedback, req.body.shot_count, req.body.target_count]; 
     
           maria.query(sql, insert_value, (err, result) => {
             if (err) {
@@ -26,8 +26,8 @@ router.post('/save', async (req, res) => {
 
 router.post('/month', async (req, res) => {
   try {
-    var sql = "SELECT * FROM kbow.shots WHERE user_id = ? AND shot_date LIKE ?;";
-    let insert_value = [req.user.user_id, `${req.body.month}%`]; 
+    var sql = "SELECT * FROM kbow.shots WHERE user_id = ? AND DATE_FORMAT(shot_date, '%Y-%m')=?;";
+    let insert_value = [req.user.user_id, req.body.month]; 
 
     maria.query(sql, insert_value, (err, result) => {
       if (err) {
@@ -35,6 +35,7 @@ router.post('/month', async (req, res) => {
         res.status(500).json({ error: 'Database query error' });
         return;
       }
+	    console.log(result);
       res.send(result);
     });
   } catch (error) {
@@ -65,8 +66,8 @@ router.post('/detail', async (req, res) => {
 
 router.post('/modify', async (req, res) => {
 	try {
-	var sql = "UPDATE kbow.shots SET shot_array = ?, feedback = ? WHERE user_id = ? AND shot_date = ?";
-    let insert_value = [req.body.shots, req.body.feedback, req.user.user_id, req.body.date];
+	var sql = "UPDATE kbow.shots SET shot_array = ?, feedback = ?, shot_count = ?, target_count = ? WHERE user_id = ? AND shot_date = ?";
+    let insert_value = [req.body.shots, req.body.feedback, req.body.shot_count, req.body.target_count, req.user.user_id, req.body.date];
         console.log(insert_value);
     maria.query(sql, insert_value, (err, result) => {
 	          if (err) {
