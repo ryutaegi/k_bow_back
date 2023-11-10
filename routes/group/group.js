@@ -111,4 +111,19 @@ router.post('/join/private', async (req, res) => {
   }
 });
 
+router.post('/list/memberdetail', async (req, res) => {
+  const userIdFromToken = req.user.user_id;
+
+  try {
+    var sql = "SELECT kbow.group_user.user_id, kbow.users.nickname, kbow.users.image_url FROM kbow.group_user INNER JOIN kbow.users ON group_user.user_id = users.user_id WHERE group_user.group_id=?";
+    const insert_value = [req.body.group_id];
+    let result = await mariaQuery(sql, insert_value);
+
+    res.send(result);
+  } catch (error) {
+    console.log('error', error);
+    res.status(403).json({ error: 'db error' });
+  }
+});
+
 module.exports = router;
