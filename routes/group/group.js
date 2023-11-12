@@ -129,24 +129,22 @@ console.log(result);
 router.get('/rank/:group_id', async (req, res) => {
   const userIdFromToken = req.user.user_id;
   const groupId = req.params.group_id;
-
+  var target = 0;
+  var shot = 0;
   try {
-    var sql = `SELECT gu.user_id, u.nickname, s.target_count / s.shot_count AS ratio, s.shot_day
-FROM group_user AS gu
-INNER JOIN users AS u ON gu.user_id = u.user_id
-LEFT JOIN (
-    SELECT user_id, target_count, shot_count, shot_day
-    FROM shots
-    WHERE user_id IN (
-        SELECT user_id FROM group_user WHERE group_id = ?
-    )
-    AND shot_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH)
-) AS s ON gu.user_id = s.user_id
-ORDER BY ratio DESC;
-`;
+    var sql = 'SELECT gu.user_id, u.nickname, s.target_count, s.shot_count FROM kbow.group_user AS gu INNER JOIN kbow.users AS u ON gu.user_id = u.user_id LEFT JOIN kbow.shots AS s ON gu.user_id = s.user_id WHERE gu.group_id = ? AND s.shot_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH) GROUP BY gu.user_id, u.nickname, s.target_count, s.shot_count;'
     let insert_value = [groupId];
     let result = await mariaQuery(sql, insert_value);
-    res.send(result);
+    console.log(result);
+const extractedData = result.map(item => ({
+	    user_id: item.user_id,
+	    nickname: item.nickname,
+	    target_count: item.target_count,
+	    shot_count: item.shot_count
+}));
+	  console.log(extractedData);
+
+	  res.send(result);
   } catch (error) {
     console.log('error', error);
     res.status(403).json({ error: 'db error' });
