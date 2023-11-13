@@ -178,7 +178,7 @@ for (let i = 0; i < Math.min(3, sortedElementCountResults.length); i++) {
 
 
 
-	  res.send(result);
+res.json({ sortedRatioResults, sortedElementCountResults });
   } catch (error) {
     console.log('error', error);
     res.status(403).json({ error: 'db error' });
