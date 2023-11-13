@@ -10,7 +10,7 @@ router.get('/list/:boardType', async (req, res) => {
   try {
       const boardType = req.params.boardType; // 게시판 유형 가져오기
 
-      var sql = "SELECT * FROM kbow.board WHERE board_type_id = ?;";
+      var sql = "SELECT *, CONVERT_TZ(created_at, 'UTC', 'Asia/Seoul') AS created_at_korean FROM kbow.board WHERE board_type_id = ?;";
       maria.query(sql, [boardType], (err, result) => {
           if (err) {
               console.log(err);
@@ -27,9 +27,11 @@ router.get('/list/:boardType', async (req, res) => {
 
 router.get('/detail/:board_id', async (req, res) => {
   try {
+	  const today = new Date();
+	  console.log(today);
       const board_id = req.params.board_id; // 게시판 유형 가져오기
 
-      var sql = "SELECT * FROM kbow.board WHERE board_id = ?;";
+      var sql = "SELECT *, CONVERT_TZ(created_at, 'UTC', 'Asia/Seoul') AS created_at_korean FROM kbow.board WHERE board_id = ?;";
       maria.query(sql, [board_id], (err, result) => {
           if (err) {
               console.log(err);

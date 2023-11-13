@@ -26,7 +26,7 @@ router.post('/save', async (req, res) => {
 
 router.post('/month', async (req, res) => {
   try {
-    var sql = "SELECT * FROM kbow.shots WHERE user_id = ? AND DATE_FORMAT(shot_date, '%Y-%m')=?;";
+    var sql = "SELECT *, CONVERT_TZ(shot_date, 'UTC', 'Asia/Seoul') AS shot_date_korean FROM kbow.shots WHERE user_id = ? AND DATE_FORMAT(shot_date, '%Y-%m')=?;";
     let insert_value = [req.user.user_id, req.body.month]; 
 
     maria.query(sql, insert_value, (err, result) => {

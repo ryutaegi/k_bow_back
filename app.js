@@ -3,7 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-
+const moment = require('moment-timezone');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -16,6 +16,8 @@ var verifyToken = require('./middlewares/verifyToken');
 var app = express();
 const maria = require('./database/connect/maria');
 maria.connect();
+
+moment.tz.setDefault('Asia/Seoul');
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
