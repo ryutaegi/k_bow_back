@@ -137,36 +137,44 @@ router.get('/rank/:group_id', async (req, res) => {
     let result = await mariaQuery(sql, insert_value);
     console.log(result);
 
-    // 각 사용자별로 계산된 결과를 저장할 배열
-const userResults = [];
+  
+    // 사용자별 최상위 ratio와 elementCount 결과를 저장할 객체를 생성합니다.
+const userRatioResults = {};
+const userElementCountResults = {};
 
 // 각 사용자별로 target_count / shot_count 계산하고 요소 개수 파악
 result.forEach(item => {
-  const userId = item.user_id;
-  const ratio = item.target_count / item.shot_count;
-  const elementCount = item.shot_count; // 수정: 변수 이름 수정
-  userResults.push({ user_id: userId, ratio: ratio, elementCount: elementCount });
+    const userId = item.user_id;
+    const ratio = item.target_count / item.shot_count;
+    const elementCount = item.shot_count;
+
+    // ratio 결과를 처리합니다.
+    if (!userRatioResults[userId] || ratio > userRatioResults[userId].ratio) {
+        userRatioResults[userId] = { user_id: userId, ratio: ratio };
+    }
+
+    // elementCount 결과를 처리합니다.
+    if (!userElementCountResults[userId] || elementCount > userElementCountResults[userId].elementCount) {
+        userElementCountResults[userId] = { user_id: userId, elementCount: elementCount };
+    }
 });
 
-// ratio를 기준으로 내림차순으로 정렬
-userResults.sort((a, b) => b.ratio - a.ratio);
-
-// 상위 3순위 출력
+// ratio를 기준으로 내림차순으로 정렬하여 상위 3순위 출력
+const sortedRatioResults = Object.values(userRatioResults).sort((a, b) => b.ratio - a.ratio);
 console.log("Top 3 by Ratio:");
-for (let i = 0; i < Math.min(3, userResults.length); i++) {
-  const results = userResults[i];
-  console.log(`Rank ${i + 1}: User ID ${results.user_id}, Ratio ${results.ratio}, Element Count ${results.elementCount}`);
+for (let i = 0; i < Math.min(3, sortedRatioResults.length); i++) {
+    const results = sortedRatioResults[i];
+    console.log(`Rank ${i + 1}: User ID ${results.user_id}, Ratio ${results.ratio}`);
 }
 
-// elementCount를 기준으로 내림차순으로 정렬
-userResults.sort((a, b) => b.elementCount - a.elementCount);
-
-// 상위 3순위 출력
+// elementCount를 기준으로 내림차순으로 정렬하여 상위 3순위 출력
+const sortedElementCountResults = Object.values(userElementCountResults).sort((a, b) => b.elementCount - a.elementCount);
 console.log("Top 3 by Element Count:");
-for (let i = 0; i < Math.min(3, userResults.length); i++) {
-  const results = userResults[i];
-  console.log(`Rank ${i + 1}: User ID ${results.user_id}, Ratio ${results.ratio}, Element Count ${results.elementCount}`);
+for (let i = 0; i < Math.min(3, sortedElementCountResults.length); i++) {
+    const results = sortedElementCountResults[i];
+    console.log(`Rank ${i + 1}: User ID ${results.user_id}, Element Count ${results.elementCount}`);
 }
+
 
 
 
