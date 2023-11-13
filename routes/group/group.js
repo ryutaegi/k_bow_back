@@ -136,13 +136,39 @@ router.get('/rank/:group_id', async (req, res) => {
     let insert_value = [groupId];
     let result = await mariaQuery(sql, insert_value);
     console.log(result);
-const extractedData = result.map(item => ({
-	    user_id: item.user_id,
-	    nickname: item.nickname,
-	    target_count: item.target_count,
-	    shot_count: item.shot_count
-}));
-	  console.log(extractedData);
+
+    // 각 사용자별로 계산된 결과를 저장할 배열
+const userResults = [];
+
+// 각 사용자별로 target_count / shot_count 계산하고 요소 개수 파악
+result.forEach(item => {
+  const userId = item.user_id;
+  const ratio = item.target_count / item.shot_count;
+  const elementCount = item.shot_count; // 수정: 변수 이름 수정
+  userResults.push({ user_id: userId, ratio: ratio, elementCount: elementCount });
+});
+
+// ratio를 기준으로 내림차순으로 정렬
+userResults.sort((a, b) => b.ratio - a.ratio);
+
+// 상위 3순위 출력
+console.log("Top 3 by Ratio:");
+for (let i = 0; i < Math.min(3, userResults.length); i++) {
+  const results = userResults[i];
+  console.log(`Rank ${i + 1}: User ID ${results.user_id}, Ratio ${results.ratio}, Element Count ${results.elementCount}`);
+}
+
+// elementCount를 기준으로 내림차순으로 정렬
+userResults.sort((a, b) => b.elementCount - a.elementCount);
+
+// 상위 3순위 출력
+console.log("Top 3 by Element Count:");
+for (let i = 0; i < Math.min(3, userResults.length); i++) {
+  const results = userResults[i];
+  console.log(`Rank ${i + 1}: User ID ${results.user_id}, Ratio ${results.ratio}, Element Count ${results.elementCount}`);
+}
+
+
 
 	  res.send(result);
   } catch (error) {
