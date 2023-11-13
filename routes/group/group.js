@@ -144,18 +144,19 @@ const userElementCountResults = {};
 
 // 각 사용자별로 target_count / shot_count 계산하고 요소 개수 파악
 result.forEach(item => {
+    const user_nickname = item.nickname;
     const userId = item.user_id;
     const ratio = item.target_count / item.shot_count;
     const elementCount = item.shot_count;
 
     // ratio 결과를 처리합니다.
     if (!userRatioResults[userId] || ratio > userRatioResults[userId].ratio) {
-        userRatioResults[userId] = { user_id: userId, ratio: ratio };
+        userRatioResults[userId] = { user_id: userId, ratio: ratio, nickname : user_nickname };
     }
 
     // elementCount 결과를 처리합니다.
     if (!userElementCountResults[userId] || elementCount > userElementCountResults[userId].elementCount) {
-        userElementCountResults[userId] = { user_id: userId, elementCount: elementCount };
+        userElementCountResults[userId] = { user_id: userId, elementCount: elementCount, nickname : user_nickname };
     }
 });
 
