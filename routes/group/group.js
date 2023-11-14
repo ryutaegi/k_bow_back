@@ -187,7 +187,7 @@ res.json({ sortedRatioResults, sortedElementCountResults });
 });
 
 
-router.post('/group/make', async (req, res) => {
+router.post('/make', async (req, res) => {
   const userIdFromToken = req.user.user_id;
 
   try {
