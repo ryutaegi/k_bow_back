@@ -222,12 +222,18 @@ router.post('/withdraw', async (req, res) => {
   try {
     var sql = "SELECT group_maker_id FROM kbow.group_info WHERE group_id = ?"
     const rows = await mariaQuery(sql, [req.body.group_id]);
-    console.log(rows);
+    console.log(rows[0].group_maker_id);
+    if(rows[0].group_maker_id !== userIdFromToken)
+	  {
+		  res.status(403).json({'error' : "그룹 제작자만 삭제가 가능합니다"});
+		  return;
 
-    // sql = "DELETE FROM kbow.group_user WHERE user_id=? AND group_id";
-    // let insert_value = [userIdFromToken, req.body.group_id];
-    // let result = await mariaQuery(sql, insert_value);
-    // console.log(result);
+	  }
+
+    sql = "DELETE FROM kbow.group_user WHERE user_id=? AND group_id";
+    let insert_value = [userIdFromToken, req.body.group_id];
+    let result = await mariaQuery(sql, insert_value);
+    console.log(result);
     res.send(result);
   } catch (error) {
     console.log('error', error);
