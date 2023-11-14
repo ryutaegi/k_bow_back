@@ -191,21 +191,19 @@ router.post('/make', async (req, res) => {
   const userIdFromToken = req.user.user_id;
 
   try {
-    var sql = "SELECT CONVERT_TZ(MAX(created_at), 'UTC', 'Asia/Seoul') AS last_group_creation_time_korean FROM kbow.group_info WHERE group_maker_id = ?"
-    const [rows] = await mariaQuery(sql, [userIdFromToken]);
-
-    if (rows.length > 0) {
-      const lastGroupCreationTime = new Date(rows[0].last_group_creation_time_korean);
+    var sql = "SELECT MAX(created_at) AS last_group_creation_time FROM kbow.group_info WHERE group_maker_id = ?"
+    const rows = await mariaQuery(sql, [userIdFromToken]);
+      const lastGroupCreationTime = new Date(rows[0].last_group_creation_time);
       const currentTime = new Date();
-
-      // 현재 시간과 이전 그룹 생성 시간을 비교하여 5분 이내에 그룹을 생성한 경우 새 그룹 생성을 막습니다.
+console.log("last", lastGroupCreationTime);
+	    console.log("current", currentTime);
+     // 현재 시간과 이전 그룹 생성 시간을 비교하여 5분 이내에 그룹을 생성한 경우 새 그룹 생성을 막습니다.
       const fiveMinutesInMillis = 5 * 60 * 1000; // 5분을 밀리초로 변환
       const timeDifference = currentTime - lastGroupCreationTime;
 
       if (timeDifference < fiveMinutesInMillis) {
-        res.status(403).json({ error: '5분 이내에 그룹을 생성할 수 없습니다.' });
+        res.status(403).json({ error: '5분 이내에 신규 그룹을 생성할 수 없습니다.' });
         return;
-      }
     }
     sql = "INSERT INTO kbow.group_info (group_name, group_maker_id, group_password, is_password, group_description) VALUE(?,?,?,?,?)";
     let insert_value = [req.body.group_name, userIdFromToken, req.body.group_password, req.body.is_password, req.body.group_description];
