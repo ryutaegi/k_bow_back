@@ -208,7 +208,9 @@ console.log("last", lastGroupCreationTime);
     sql = "INSERT INTO kbow.group_info (group_name, group_maker_id, group_password, is_password, group_description) VALUE(?,?,?,?,?)";
     let insert_value = [req.body.group_name, userIdFromToken, req.body.group_password, req.body.is_password, req.body.group_description];
     let result = await mariaQuery(sql, insert_value);
-    console.log(result);
+	  //sql = "INSERT INTO kbow.group_user (user_id, group_id) VALUE(?,?);
+	  //insert_value = [userIdFromToken, req.body.
+    console.log("result is",result);
     res.send(result);
   } catch (error) {
     console.log('error', error);
@@ -245,9 +247,11 @@ router.post('/delete', async (req, res) => {
 
 	  }
 
-    sql = "DELETE FROM group_info WHERE group_id = ?; DELETE FROM group_user WHERE group_id = ?;";
-    let insert_value = [req.body.group_id, req.body.group_id];
+    sql = "DELETE FROM kbow.group_info WHERE group_id = ?;";
+    let insert_value = [req.body.group_id];
     let result = await mariaQuery(sql, insert_value);
+	sql = "DELETE FROM kbow.group_user WHERE group_id=?;";
+	result = await mariaQuery(sql, insert_value);
     console.log(result);
     res.send(result);
   } catch (error) {
