@@ -220,6 +220,21 @@ router.post('/withdraw', async (req, res) => {
   const userIdFromToken = req.user.user_id;
 
   try {
+    var sql = "DELETE FROM kbow.group_user WHERE user_id=? AND group_id";
+    let insert_value = [userIdFromToken, req.body.group_id];
+    let result = await mariaQuery(sql, insert_value);
+    console.log(result);
+    res.send(result);
+  } catch (error) {
+    console.log('error', error);
+    res.status(403).json({ error: 'db error' });
+  }
+});
+
+router.post('/delete', async (req, res) => {
+  const userIdFromToken = req.user.user_id;
+
+  try {
     var sql = "SELECT group_maker_id FROM kbow.group_info WHERE group_id = ?"
     const rows = await mariaQuery(sql, [req.body.group_id]);
     console.log(rows[0].group_maker_id);
@@ -230,8 +245,8 @@ router.post('/withdraw', async (req, res) => {
 
 	  }
 
-    sql = "DELETE FROM kbow.group_user WHERE user_id=? AND group_id";
-    let insert_value = [userIdFromToken, req.body.group_id];
+    sql = "DELETE FROM group_info WHERE group_id = ?; DELETE FROM group_user WHERE group_id = ?;";
+    let insert_value = [req.body.group_id, req.body.group_id];
     let result = await mariaQuery(sql, insert_value);
     console.log(result);
     res.send(result);
