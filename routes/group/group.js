@@ -31,6 +31,11 @@ router.get('/join/list', async (req, res) => {
 
         insert_value = result.map(row => row.group_id);
 	console.log(insert_value);
+  if(insert_value.length == 0)
+  {
+    res.send(insert_value);
+    return ;
+  }
 	sql = "SELECT group_id, group_name, group_description, is_password FROM kbow.group_info WHERE group_id IN (?);";
       result = await mariaQuery(sql, [insert_value]);
       console.log(result);
