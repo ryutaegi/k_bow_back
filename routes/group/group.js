@@ -217,7 +217,7 @@ console.log("last", lastGroupCreationTime);
 console.log("Inserted record group_id is", idResult[0].lastGroupId);
 	  
     sql = "INSERT INTO kbow.group_user (user_id, group_id) VALUE(?,?)";
-    insert_value = [userIdFromToken, req.body.group_id];
+    insert_value = [userIdFromToken, idResult[0].lastGroupId];
     result = await mariaQuery(sql, insert_value);
 
     console.log("result is",result);
