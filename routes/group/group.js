@@ -210,13 +210,16 @@ console.log("last", lastGroupCreationTime);
     let result = await mariaQuery(sql, insert_value);
 
     // 새로운 레코드의 group_id를 가져오는 쿼리
-sql = "SELECT LAST_INSERT_ID() as lastGroupId";
-let idResult = await mariaQuery(sql);
+    sql = "SELECT LAST_INSERT_ID() as lastGroupId";
+    let idResult = await mariaQuery(sql);
 
 // 가져온 group_id를 출력
 console.log("Inserted record group_id is", idResult[0].lastGroupId);
-	  //sql = "INSERT INTO kbow.group_user (user_id, group_id) VALUE(?,?);
-	  //insert_value = [userIdFromToken, req.body.
+	  
+    sql = "INSERT INTO kbow.group_user (user_id, group_id) VALUE(?,?)";
+    insert_value = [userIdFromToken, req.body.group_id];
+    result = await mariaQuery(sql, insert_value);
+
     console.log("result is",result);
     res.send(result);
   } catch (error) {
