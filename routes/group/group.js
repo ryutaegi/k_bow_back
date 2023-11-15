@@ -237,7 +237,7 @@ router.post('/withdraw', async (req, res) => {
   const userIdFromToken = req.user.user_id;
 
   try {
-    var sql = "DELETE FROM kbow.group_user WHERE user_id=? AND group_id";
+    var sql = "DELETE FROM kbow.group_user WHERE user_id=? AND group_id=?";
     let insert_value = [userIdFromToken, req.body.group_id];
     let result = await mariaQuery(sql, insert_value);
     console.log(result);
