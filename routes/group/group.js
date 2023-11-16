@@ -31,11 +31,6 @@ router.get('/join/list', async (req, res) => {
 
         insert_value = result.map(row => row.group_id);
 	console.log(insert_value);
-  if(insert_value.length == 0)
-  {
-    res.send(insert_value);
-    return ;
-  }
 	sql = "SELECT group_id, group_name, group_description, is_password FROM kbow.group_info WHERE group_id IN (?);";
       result = await mariaQuery(sql, [insert_value]);
       console.log(result);
@@ -213,18 +208,8 @@ console.log("last", lastGroupCreationTime);
     sql = "INSERT INTO kbow.group_info (group_name, group_maker_id, group_password, is_password, group_description) VALUE(?,?,?,?,?)";
     let insert_value = [req.body.group_name, userIdFromToken, req.body.group_password, req.body.is_password, req.body.group_description];
     let result = await mariaQuery(sql, insert_value);
-
-    // 새로운 레코드의 group_id를 가져오는 쿼리
-    sql = "SELECT LAST_INSERT_ID() as lastGroupId";
-    let idResult = await mariaQuery(sql);
-
-// 가져온 group_id를 출력
-console.log("Inserted record group_id is", idResult[0].lastGroupId);
-	  
-    sql = "INSERT INTO kbow.group_user (user_id, group_id) VALUE(?,?)";
-    insert_value = [userIdFromToken, idResult[0].lastGroupId];
-    result = await mariaQuery(sql, insert_value);
-
+	  //sql = "INSERT INTO kbow.group_user (user_id, group_id) VALUE(?,?);
+	  //insert_value = [userIdFromToken, req.body.
     console.log("result is",result);
     res.send(result);
   } catch (error) {
@@ -237,7 +222,7 @@ router.post('/withdraw', async (req, res) => {
   const userIdFromToken = req.user.user_id;
 
   try {
-    var sql = "DELETE FROM kbow.group_user WHERE user_id=? AND group_id=?";
+    var sql = "DELETE FROM kbow.group_user WHERE user_id=? AND group_id";
     let insert_value = [userIdFromToken, req.body.group_id];
     let result = await mariaQuery(sql, insert_value);
     console.log(result);
