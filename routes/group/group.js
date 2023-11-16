@@ -146,13 +146,18 @@ router.get('/rank/:group_id', async (req, res) => {
     // 사용자별 최상위 ratio와 elementCount 결과를 저장할 객체를 생성합니다.
 const userRatioResults = {};
 const userElementCountResults = {};
+const userIdCounts ={};
+
+result.forEach(item => {
+	userIdCounts[item.user_id] = (userIdCounts[item.user_id] || 0) + 1;
+});
 
 // 각 사용자별로 target_count / shot_count 계산하고 요소 개수 파악
 result.forEach(item => {
     const user_nickname = item.nickname;
     const userId = item.user_id;
     const ratio = item.target_count / item.shot_count;
-    const elementCount = item.shot_count;
+    const elementCount = userIdCounts[item.user_id];
 
     // ratio 결과를 처리합니다.
     if (!userRatioResults[userId] || ratio > userRatioResults[userId].ratio) {
@@ -164,7 +169,8 @@ result.forEach(item => {
         userElementCountResults[userId] = { user_id: userId, elementCount: elementCount, nickname : user_nickname };
     }
 });
-
+	  console.log("count", userIdCounts);
+console.log("length",result[0].user_id);
 // ratio를 기준으로 내림차순으로 정렬하여 상위 3순위 출력
 const sortedRatioResults = Object.values(userRatioResults).sort((a, b) => b.ratio - a.ratio);
 console.log("Top 3 by Ratio:");
