@@ -18,11 +18,9 @@ router.post('/login', async (req, res) => {
       
       });
    
-      var sql = "SELECT * FROM kbow.users WHERE social_type = 1 AND social_id = ?;";
-      
-      // maria.query를 Promise로 감싸기
+
       const result = await new Promise((resolve, reject) => {
-        maria.query(sql, response.data.response.id, (err, result) => {
+        maria.query(sql, response.data.id, (err, result) => {
             if (err) {
                 return reject(err);
             }
@@ -32,25 +30,26 @@ router.post('/login', async (req, res) => {
         
         let jwtToken;
         if (result.length === 0) { //회원가입 처리
-          //console.log("여기", result.length);
           sql = "INSERT INTO kbow.users(social_id, social_type, nickname, social_email, age_group, gender, image_url, agree) VALUES(?,?,?,?,?,?,?,?)";
           let insert_value = [response.data.id, 1, response.data.kakao_account.profile.nickname, response.data.kakao_account.email, response.data.kakao_account.age_range ? response.data.kakao_account.age_range : null, response.data.kakao_account.gender ? response.data.kakao_account.gender : null, response.data.kakao_account.profile.profile_image_url ? response.data.kakao_account.profile.profile_image_url : null, 0];
           //console.log("테스트", insert_value);
+          
           const insertResult = await new Promise((resolve, reject) => {
-            maria.query(sql, insert_values, (err, result) => {
-                if (err) {
-                    return reject(err);
-                }
-                resolve(result);
-            });
+          maria.query(sql, insert_value, (err, result1) => {
+            if (err) {
+              return reject(err);
+            }
+            resolve(result1);
+          });
         });
+            //console.log("회원가입 성공", insert_value)
           
           //회원가입 처리
           // JWT를 발급
           jwtToken = jwt.sign({
             social_id : response.data.id,
             social_type : 1,
-            user_id : result1[0].user_id,
+            user_id : insertResult.insertId,
             image_url: response.data.kakao_account.profile.profile_image_url,
             nickname: response.data.kakao_account.profile.nickname,
             agree : 0,
@@ -75,7 +74,7 @@ router.post('/login', async (req, res) => {
           });
           res.json({ isNewUser: false, token: jwtToken });
         }
-      });
+      
   
     } catch (error) {
       console.log('error', error);
