@@ -7,13 +7,13 @@ const maria = require('../database/connect/maria');
 const router = express.Router();
 
 router.post('/login', async (req, res) => {
-    const token = req.body.token;
-    console.log(token);
+    const tokens = req.body.token;
+    console.log(tokens);
     
     try {
       const response = await axios.get('https://openapi.naver.com/v1/nid/me', {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${tokens}`,
         }
       
       });
@@ -25,7 +25,7 @@ router.post('/login', async (req, res) => {
           return;
         }
         
-        let jwtToken;
+        var jwtToken = "none";
         if (result.length === 0) { //회원가입 처리
           //console.log("여기", result.length);
           sql = "INSERT INTO kbow.users(social_id, social_type, nickname, social_email, age_group, gender, image_url, agree) VALUES(?,?,?,?,?,?,?,?)";
@@ -53,7 +53,8 @@ router.post('/login', async (req, res) => {
             expiresIn: '3h'
           });
         });
-          return res.json({ isNewUser: true, token: jwtToken });
+		console.log("jwt is", jwtToken);
+          return res.json({ isNewUser: true, accesstoken: jwtToken });
         }
         else { //로그인 처리
           console.log("로그인 처리");
