@@ -17,7 +17,7 @@ router.post('/login', async (req, res) => {
         }
       
       });
-      console.log("response", response);
+      console.log("response", response.data.response.id);
    
     //   var sql = "SELECT * FROM kbow.users WHERE social_type = 1 AND social_id = ?;";
     //   maria.query(sql, response.data.id, (err, result) => {

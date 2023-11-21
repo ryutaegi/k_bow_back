@@ -12,7 +12,7 @@ const mariaQuery = util.promisify(maria.query).bind(maria);
 
 router.get('/list', async (req, res) => {
   try {
-    var sql = "SELECT group_id, group_name, group_description, is_password, group_maker_id FROM kbow.group_info;";
+    var sql = "SELECT group_id, group_name, group_description, is_password FROM kbow.group_info;";
     const result = await mariaQuery(sql);
     console.log(result);
     res.send(result);
@@ -31,7 +31,7 @@ router.get('/join/list', async (req, res) => {
 
         insert_value = result.map(row => row.group_id);
 	console.log(insert_value);
-	sql = "SELECT group_id, group_name, group_description, is_password FROM kbow.group_info WHERE group_id IN (?);";
+	sql = "SELECT group_id, group_name, group_description, is_password, group_maker_id FROM kbow.group_info WHERE group_id IN (?);";
       result = await mariaQuery(sql, [insert_value]);
       console.log(result);
       res.send(result);
