@@ -17,58 +17,57 @@ router.post('/login', async (req, res) => {
         }
       
       });
-      console.log("response", response.data.response.id);
-   
-    //   var sql = "SELECT * FROM kbow.users WHERE social_type = 1 AND social_id = ?;";
-    //   maria.query(sql, response.data.id, (err, result) => {
-    //     if (err) {
-    //       console.log(err);
-    //       return;
-    //     }
+      console.log("response", response.data.response);
+      var sql = "SELECT * FROM kbow.users WHERE social_type = 2 AND social_id = ?;";
+      maria.query(sql, response.data.response.id, (err, result) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
         
-    //     let jwtToken;
-    //     if (result.length === 0) { //회원가입 처리
-    //       //console.log("여기", result.length);
-    //       sql = "INSERT INTO kbow.users(social_id, social_type, nickname, social_email, age_group, gender, image_url, agree) VALUES(?,?,?,?,?,?,?,?)";
-    //       let insert_value = [response.data.id, 1, response.data.kakao_account.profile.nickname, response.data.kakao_account.email, response.data.kakao_account.age_range | null, response.data.kakao_account.gender | null, response.data.kakao_account.profile.profile_image_url | null, 0];
-    //       //console.log("테스트", insert_value);
-    //       maria.query(sql, insert_value, (err, result) => {
-    //         if (err) {
-    //           console.log(err);
-    //           return;
-    //         }
-    //         //console.log("회원가입 성공", insert_value)
-    //       });
-    //       //회원가입 처리
-    //       // JWT를 발급
-    //       jwtToken = jwt.sign({
-    //         social_id : response.data.id,
-    //         social_type : 1,
-    //         user_id : result[0].user_id,
-    //         image_url: response.data.kakao_account.profile.profile_image_url,
-    //         nickname: response.data.kakao_account.profile.nickname,
-    //         agree : 0,
-    //       }, process.env.SECRET_KEY, {
-    //         expiresIn: '3h'
-    //       });
-    //       res.json({ isNewUser: true, token: jwtToken });
-    //     }
-    //     else { //로그인 처리
-    //       console.log("로그인 처리");
-    //       // 로그인 처리시 JWT를 발급
-    //       jwtToken = jwt.sign({
-    //         social_id : response.data.id,
-    //         social_type : 1,
-    //         user_id : result[0].user_id,
-    //         image_url: response.data.kakao_account.profile.profile_image_url,
-    //         nickname: response.data.kakao_account.profile.nickname,
-    //         agree : result[0].agree
-    //       }, process.env.SECRET_KEY, {
-    //         expiresIn: '3h'
-    //       });
-    //       res.json({ isNewUser: false, token: jwtToken });
-    //     }
-    //   });
+        let jwtToken;
+        if (result.length === 0) { //회원가입 처리
+          //console.log("여기", result.length);
+          sql = "INSERT INTO kbow.users(social_id, social_type, nickname, social_email, age_group, gender, image_url, agree) VALUES(?,?,?,?,?,?,?,?)";
+          let insert_value = [response.data.response.id, 2, response.data.response.name, null, response.data.response.age | null, response.data.response.gender | null, response.data.profile_image | null, 0];
+          //console.log("테스트", insert_value);
+          maria.query(sql, insert_value, (err, result) => {
+            if (err) {
+              console.log(err);
+              return;
+            }
+            //console.log("회원가입 성공", insert_value)
+          });
+          //회원가입 처리
+          // JWT를 발급
+          jwtToken = jwt.sign({
+            social_id : response.data.response.id,
+            social_type : 2,
+            user_id : result[0].user_id,
+            image_url: response.data.response.profile_image,
+            nickname: response.data.response.name,
+            agree : 0,
+          }, process.env.SECRET_KEY, {
+            expiresIn: '3h'
+          });
+          res.json({ isNewUser: true, token: jwtToken });
+        }
+        else { //로그인 처리
+          console.log("로그인 처리");
+          // 로그인 처리시 JWT를 발급
+          jwtToken = jwt.sign({
+            social_id : response.data.response.id,
+            social_type : 2,
+            user_id : result[0].user_id,
+            image_url: response.data.response.profile_image,
+            nickname: response.data.response.name,
+            agree : result[0].agree
+          }, process.env.SECRET_KEY, {
+            expiresIn: '3h'
+          });
+          res.json({ isNewUser: false, token: jwtToken });
+        }
+      });
   
     } catch (error) {
       console.log('error', error);
