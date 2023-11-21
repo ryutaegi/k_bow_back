@@ -32,25 +32,26 @@ router.post('/login', async (req, res) => {
           sql = "INSERT INTO kbow.users(social_id, social_type, nickname, social_email, age_group, gender, image_url, agree) VALUES(?,?,?,?,?,?,?,?)";
           let insert_value = [response.data.response.id, 2, response.data.response.name, null, response.data.response.age | null, response.data.response.gender | null, response.data.profile_image | null, 0];
           //console.log("테스트", insert_value);
-          maria.query(sql, insert_value, (err, result) => {
+          maria.query(sql, insert_value, (err, result1) => {
             if (err) {
               console.log(err);
               return;
             }
             //console.log("회원가입 성공", insert_value)
-          });
+          
           //회원가입 처리
           // JWT를 발급
           jwtToken = jwt.sign({
             social_id : response.data.response.id,
             social_type : 2,
-            user_id : result[0].user_id,
+            user_id : result1[0].user_id,
             image_url: response.data.response.profile_image,
             nickname: response.data.response.name,
             agree : 0,
           }, process.env.SECRET_KEY, {
             expiresIn: '3h'
           });
+        });
           res.json({ isNewUser: true, token: jwtToken });
         }
         else { //로그인 처리
