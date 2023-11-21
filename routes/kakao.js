@@ -18,7 +18,8 @@ router.post('/login', async (req, res) => {
       
       });
    
-
+      var sql = "SELECT * FROM kbow.users WHERE social_type = 1 AND social_id = ?;";
+      
       const result = await new Promise((resolve, reject) => {
         maria.query(sql, response.data.id, (err, result) => {
             if (err) {
