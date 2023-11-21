@@ -15,99 +15,69 @@ router.post('/login', async (req, res) => {
         headers: {
           Authorization: `Bearer ${tokens}`,
         }
-      
       });
       console.log("response", response.data.response);
+
       var sql = "SELECT * FROM kbow.users WHERE social_type = 2 AND social_id = ?;";
-      maria.query(sql, response.data.response.id, (err, result) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        
-        var jwtToken = "none";
-        if (result.length === 0) { //회원가입 처리
-          //console.log("여기", result.length);
-          sql = "INSERT INTO kbow.users(social_id, social_type, nickname, social_email, age_group, gender, image_url, agree) VALUES(?,?,?,?,?,?,?,?)";
-          let insert_value = [response.data.response.id, 2, response.data.response.name, null, response.data.response.age | null, response.data.response.gender | null, response.data.profile_image | null, 0];
-          //console.log("테스트", insert_value);
-          maria.query(sql, insert_value, (err, result1) => {
-            console.log("result1", result1);
-            if (err) {
-              console.log(err);
-              return;
-            }
-            //console.log("회원가입 성공", insert_value)
-          
-          //회원가입 처리
-          // JWT를 발급 
-		  console.log("회원가입처리");
-          jwtToken = jwt.sign({
-            social_id : response.data.response.id,
-            social_type : 2,
-            user_id : result1.insertedId,
-            image_url: response.data.response.profile_image,
-            nickname: response.data.response.name,
-            agree : 0,
-          }, process.env.SECRET_KEY, {
-            expiresIn: '3h'
+
+      // maria.query를 Promise로 감싸기
+      const result = await new Promise((resolve, reject) => {
+          maria.query(sql, response.data.response.id, (err, result) => {
+              if (err) {
+                  return reject(err);
+              }
+              resolve(result);
           });
-        });
-		console.log("jwt is", jwtToken);
-          return res.json({ isNewUser: true, accesstoken: jwtToken });
-        }
-        else { //로그인 처리
-          console.log("로그인 처리");
-          // 로그인 처리시 JWT를 발급
-          jwtToken = jwt.sign({
-            social_id : response.data.response.id,
-            social_type : 2,
-            user_id : result[0].user_id,
-            image_url: response.data.response.profile_image,
-            nickname: response.data.response.name,
-            agree : result[0].agree
-          }, process.env.SECRET_KEY, {
-            expiresIn: '3h'
-          });
-          return res.json({ isNewUser: false, token: jwtToken });
-        }
       });
-  
+
+      let jwtToken;
+      if (result.length === 0) {
+          // 회원가입 처리와 JWT 발급
+          sql = "INSERT INTO kbow.users(social_id, social_type, nickname, social_email, age_group, gender, image_url, agree) VALUES(?,?,?,?,?,?,?,?)";
+          let insert_values = [response.data.response.id, 2, response.data.response.name, null, response.data.response.age | null, response.data.response.gender | null, response.data.profile_image | null, 0];
+          
+          const insertResult = await new Promise((resolve, reject) => {
+              maria.query(sql, insert_values, (err, result) => {
+                  if (err) {
+                      return reject(err);
+                  }
+                  resolve(result);
+              });
+          });
+
+          jwtToken = jwt.sign({
+              social_id : response.data.response.id,
+              social_type : 2,
+              user_id : insertResult.insertId,
+              image_url: response.data.response.profile_image,
+              nickname: response.data.response.name,
+              agree : 0,
+          }, process.env.SECRET_KEY, {
+              expiresIn: '3h'
+          });
+
+          console.log("jwt is", jwtToken);
+          return res.json({ isNewUser: true, token: jwtToken });
+      } else {
+          // 로그인 처리와 JWT 발급
+          jwtToken = jwt.sign({
+              social_id : response.data.response.id,
+              social_type : 2,
+              user_id : result[0].user_id,
+              image_url: response.data.response.profile_image,
+              nickname: response.data.response.name,
+              agree : result[0].agree
+          }, process.env.SECRET_KEY, {
+              expiresIn: '3h'
+          });
+
+          console.log("jwt is", jwtToken);
+          return res.json({ isNewUser: false, token: jwtToken });
+      }
     } catch (error) {
       console.log('error', error);
       res.status(400).json({ error: 'Error fetching user data from Kakao' });
     }
 });
-
-// router.post('/logout', async (req, res) => {
-//     console.log(req.body);
-//     const formUrlEncoded = (x) =>
-//     Object.keys(x).reduce((p, c) => p + `&${c}=${encodeURIComponent(x[c])}`, "");
-//     try {
-//       const response = await axios.post('https://kapi.kakao.com/v1/user/logout', formUrlEncoded({
-//           target_id: req.body.social_id,
-//           target_id_type: "user_id",
-//         }), {
-//         headers: {
-//           Authorization: `KakaoAK ${process.env.SERVICE_APP_ADMIN_KEY}`,
-//         }
-//       });
-//       console.log('Logout successful');
-//       res.status(200).json({
-//           status: 'success',
-//           message: 'Logged out successfully'
-//       });
-//   } catch(error) {
-//       console.log('error', error);
-      
-//       res.status(400).json({
-//           status: 'error',
-//           message: 'Error during logout',
-//           detail: error.message  // 에러 메시지를 상세하게 전달
-//       });
-//   }
-// });
-
-
 
 module.exports = router;
