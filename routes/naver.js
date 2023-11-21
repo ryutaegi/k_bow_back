@@ -44,7 +44,7 @@ router.post('/login', async (req, res) => {
           jwtToken = jwt.sign({
             social_id : response.data.response.id,
             social_type : 2,
-            user_id : result1[0].user_id,
+            user_id : result1[0].insertedId,
             image_url: response.data.response.profile_image,
             nickname: response.data.response.name,
             agree : 0,
