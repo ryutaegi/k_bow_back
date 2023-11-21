@@ -38,8 +38,8 @@ router.post('/login', async (req, res) => {
             }
             //console.log("회원가입 성공", insert_value)
           });
-  
-          // 여기에서 JWT를 발급
+          //회원가입 처리
+          // JWT를 발급
           jwtToken = jwt.sign({
             social_id : response.data.id,
             social_type : 1,
@@ -48,7 +48,7 @@ router.post('/login', async (req, res) => {
             nickname: response.data.kakao_account.profile.nickname,
             agree : 0,
           }, process.env.SECRET_KEY, {
-            expiresIn: '1h'
+            expiresIn: '3h'
           });
           res.json({ isNewUser: true, token: jwtToken });
         }
@@ -63,7 +63,7 @@ router.post('/login', async (req, res) => {
             nickname: response.data.kakao_account.profile.nickname,
             agree : result[0].agree
           }, process.env.SECRET_KEY, {
-            expiresIn: '1h'
+            expiresIn: '3h'
           });
           res.json({ isNewUser: false, token: jwtToken });
         }
