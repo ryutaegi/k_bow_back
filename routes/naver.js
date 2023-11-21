@@ -34,8 +34,8 @@ router.post('/login', async (req, res) => {
       if (result.length === 0) {
           // 회원가입 처리와 JWT 발급
           sql = "INSERT INTO kbow.users(social_id, social_type, nickname, social_email, age_group, gender, image_url, agree) VALUES(?,?,?,?,?,?,?,?)";
-          let insert_values = [response.data.response.id, 2, response.data.response.name, null, response.data.response.age | null, response.data.response.gender | null, response.data.profile_image | null, 0];
-          
+          let insert_values = [response.data.response.id, 2, response.data.response.name, null, response.data.response.age ? response.data.response.age : null, response.data.response.gender ? response.data.response.gender : null, response.data.response.profile_image ? response.data.response.profile_image : null, 0];
+         console.log(insert_values);
           const insertResult = await new Promise((resolve, reject) => {
               maria.query(sql, insert_values, (err, result) => {
                   if (err) {

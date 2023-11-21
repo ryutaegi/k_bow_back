@@ -29,7 +29,7 @@ router.post('/login', async (req, res) => {
         if (result.length === 0) { //회원가입 처리
           //console.log("여기", result.length);
           sql = "INSERT INTO kbow.users(social_id, social_type, nickname, social_email, age_group, gender, image_url, agree) VALUES(?,?,?,?,?,?,?,?)";
-          let insert_value = [response.data.id, 1, response.data.kakao_account.profile.nickname, response.data.kakao_account.email, response.data.kakao_account.age_range | null, response.data.kakao_account.gender | null, response.data.kakao_account.profile.profile_image_url | null, 0];
+          let insert_value = [response.data.id, 1, response.data.kakao_account.profile.nickname, response.data.kakao_account.email, response.data.kakao_account.age_range ? response.data.kakao_account.age_range : null, response.data.kakao_account.gender ? response.data.kakao_account.gender : null, response.data.kakao_account.profile.profile_image_url ? response.data.kakao_account.profile.profile_image_url : null, 0];
           //console.log("테스트", insert_value);
           maria.query(sql, insert_value, (err, result1) => {
             if (err) {
