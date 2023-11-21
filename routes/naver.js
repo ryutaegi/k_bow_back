@@ -40,7 +40,8 @@ router.post('/login', async (req, res) => {
             //console.log("회원가입 성공", insert_value)
           
           //회원가입 처리
-          // JWT를 발급
+          // JWT를 발급 
+		  console.log("회원가입처리");
           jwtToken = jwt.sign({
             social_id : response.data.response.id,
             social_type : 2,
@@ -52,7 +53,7 @@ router.post('/login', async (req, res) => {
             expiresIn: '3h'
           });
         });
-          res.json({ isNewUser: true, token: jwtToken });
+          return res.json({ isNewUser: true, token: jwtToken });
         }
         else { //로그인 처리
           console.log("로그인 처리");
@@ -67,7 +68,7 @@ router.post('/login', async (req, res) => {
           }, process.env.SECRET_KEY, {
             expiresIn: '3h'
           });
-          res.json({ isNewUser: false, token: jwtToken });
+          return res.json({ isNewUser: false, token: jwtToken });
         }
       });
   
