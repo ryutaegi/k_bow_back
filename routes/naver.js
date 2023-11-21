@@ -33,6 +33,7 @@ router.post('/login', async (req, res) => {
           let insert_value = [response.data.response.id, 2, response.data.response.name, null, response.data.response.age | null, response.data.response.gender | null, response.data.profile_image | null, 0];
           //console.log("테스트", insert_value);
           maria.query(sql, insert_value, (err, result1) => {
+            console.log("result1", result1);
             if (err) {
               console.log(err);
               return;
