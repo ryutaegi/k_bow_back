@@ -5,6 +5,7 @@ const { SERVICE_APP_ADMIN_KEY, SECRET_KEY } = require('../../config/constants');
 //const { getUserBySocialId, createUser } = require('../database/queries/userQueries');
 const maria = require('../../database/connect/maria');
 const router = express.Router();
+const util = require('util');
 // Convert the callback-based maria.query to a promise-based function
 const mariaQuery = util.promisify(maria.query).bind(maria);
 
