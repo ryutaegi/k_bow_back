@@ -9,7 +9,7 @@ const util = require('util');
 // Convert the callback-based maria.query to a promise-based function
 const mariaQuery = util.promisify(maria.query).bind(maria);
 
-router.get('/list/:boardType', async (req, res) => {
+router.get('/list/:boardType/:page', async (req, res) => {
   try {
     const boardType = req.params.boardType;
     const page = req.params.page;
