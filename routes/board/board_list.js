@@ -9,24 +9,22 @@ const util = require('util');
 // Convert the callback-based maria.query to a promise-based function
 const mariaQuery = util.promisify(maria.query).bind(maria);
 
-router.get('/list/:boardType', async (req, res) => {
-  try {
-      const boardType = req.params.boardType; // 게시판 유형 가져오기
-
-      var sql = "SELECT *, CONVERT_TZ(created_at, 'UTC', 'Asia/Seoul') AS created_at_korean FROM kbow.board WHERE board_type_id = ?;";
-      maria.query(sql, [boardType], (err, result) => {
-          if (err) {
-              console.log(err);
-              return;
-          }
-          console.log(result);
-          res.send(result);
+router.get('/list/:boardType/:page', async (req, res) => {
+    try {
+      const boardType = req.params.boardType;
+      const page = req.params.page;
+      const limit = 10; // 한 페이지에 표시할 게시글 수
+      const offset = (page - 1) * limit; // 건너뛸 게시글 수
+  
+      var sql = "SELECT *, CONVERT_TZ(created_at, 'UTC', 'Asia/Seoul') AS created_at_korean FROM kbow.board WHERE board_type_id = ? LIMIT ? OFFSET ?;";
+      maria.query(sql, [boardType, limit, offset], (err, result) => {
+        // 나머지 코드...
       });
-  } catch (error) {
-      console.log('error', error);
-      res.status(403).json({ error: 'db error' });
-  }
-});
+    } catch (error) {
+      // 에러 처리...
+    }
+  });
+  
 
 router.get('/detail/:board_id', async (req, res) => {
   try {
