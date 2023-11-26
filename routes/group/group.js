@@ -12,8 +12,12 @@ const mariaQuery = util.promisify(maria.query).bind(maria);
 
 router.get('/list', async (req, res) => {
   try {
-    var sql = "SELECT group_id, group_name, group_description, is_password FROM kbow.group_info;";
-    const result = await mariaQuery(sql);
+    const page = req.query.page || 1; // 기본 페이지는 1
+    const limit = 10; // 페이지당 아이템 수
+    const offset = (page - 1) * limit; // 건너뛸 아이템 수
+
+    var sql = "SELECT group_id, group_name, group_description, is_password FROM kbow.group_info LIMIT ? OFFSET ?;";
+    const result = await mariaQuery(sql, [limit, offset]);
     console.log(result);
     res.send(result);
   } catch (error) {
