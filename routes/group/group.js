@@ -277,4 +277,18 @@ router.post('/delete', async (req, res) => {
   }
 });
 
+router.post('/select', async (req, res) => {
+  const userIdFromToken = req.user.user_id;
+
+  try {
+    var sql = "SELECT group_id, is_password, FROM kbow.group_info WHERE group_name=?";
+    const insert_value = [req.body.title];
+    let result = await mariaQuery(sql, insert_value);
+    res.send(result);
+  } catch (error) {
+    console.log('error', error);
+    res.status(403).json({ error: 'db error' });
+  }
+});
+
 module.exports = router;
