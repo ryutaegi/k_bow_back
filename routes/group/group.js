@@ -223,8 +223,9 @@ console.log("last", lastGroupCreationTime);
     sql = "INSERT INTO kbow.group_info (group_name, group_maker_id, group_password, is_password, group_description) VALUE(?,?,?,?,?)";
     let insert_value = [req.body.group_name, userIdFromToken, req.body.group_password, req.body.is_password, req.body.group_description];
     let result = await mariaQuery(sql, insert_value);
-	  //sql = "INSERT INTO kbow.group_user (user_id, group_id) VALUE(?,?);
-	  //insert_value = [userIdFromToken, req.body.
+	  sql = "INSERT INTO kbow.group_user (user_id, group_id) VALUE(?,?)";
+	  insert_value = [userIdFromToken, result.insertId];
+    console.log(insert_value);
     console.log("result is",result);
     res.send(result);
   } catch (error) {
