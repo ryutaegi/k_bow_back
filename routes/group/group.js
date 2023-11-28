@@ -225,9 +225,10 @@ console.log("last", lastGroupCreationTime);
     let result = await mariaQuery(sql, insert_value);
 	  sql = "INSERT INTO kbow.group_user (user_id, group_id) VALUE(?,?)";
 	  insert_value = [userIdFromToken, result.insertId];
+    let result1 = await mariaQuery(sql, insert_value);
     console.log(insert_value);
-    console.log("result is",result);
-    res.send(result);
+    console.log("result is",result1);
+    res.send(result1);
   } catch (error) {
     console.log('error', error);
     res.status(403).json({ error: 'db error' });
