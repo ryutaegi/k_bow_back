@@ -16,7 +16,7 @@ router.get('/list/:boardType/:page', async (req, res) => {
     const limit = 10; // 한 페이지에 표시할 게시글 수
     const offset = (page - 1) * limit; // 건너뛸 게시글 수
 
-    var sql = "SELECT *, CONVERT_TZ(created_at, 'UTC', 'Asia/Seoul') AS created_at_korean FROM kbow.board WHERE board_type_id = ? LIMIT ? OFFSET ?;";
+    var sql = "SELECT *, CONVERT_TZ(created_at, 'UTC', 'Asia/Seoul') AS created_at_korean FROM kbow.board WHERE board_type_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?;";
       maria.query(sql, [boardType, limit, offset], (err, result) => {
           if (err) {
               console.log(err);
