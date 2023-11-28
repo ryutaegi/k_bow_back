@@ -53,7 +53,7 @@ router.post('/login', async (req, res) => {
               nickname: response.data.response.name,
               agree : 0,
           }, process.env.SECRET_KEY, {
-              expiresIn: '3h'
+              expiresIn: '7d'
           });
 
           console.log("jwt is", jwtToken);
@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
               nickname: response.data.response.name,
               agree : result[0].agree
           }, process.env.SECRET_KEY, {
-              expiresIn: '3h'
+              expiresIn: '7d'
           });
 
           console.log("jwt is", jwtToken);
