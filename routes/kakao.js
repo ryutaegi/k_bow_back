@@ -55,7 +55,7 @@ router.post('/login', async (req, res) => {
             nickname: response.data.kakao_account.profile.nickname,
             agree : 0,
           }, process.env.SECRET_KEY, {
-            expiresIn: '3h'
+            expiresIn: '3m'
           });
         
           res.json({ isNewUser: true, token: jwtToken });
@@ -71,7 +71,7 @@ router.post('/login', async (req, res) => {
             nickname: response.data.kakao_account.profile.nickname,
             agree : result[0].agree
           }, process.env.SECRET_KEY, {
-            expiresIn: '3h'
+            expiresIn: '3m'
           });
           res.json({ isNewUser: false, token: jwtToken });
         }
