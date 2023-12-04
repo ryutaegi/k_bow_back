@@ -94,12 +94,12 @@ router.post('/join/private', async (req, res) => {
             }
 		console.log(result[0]['group_password']);
 		if(result[0]['group_password'] != req.body.group_password)
-			res.status(401).json({ error : 'password error'});
+			return res.status(401).json({ error : 'password error'});
         
         });
     } catch (error) {
         console.log('error', error);
-        res.status(403).json({ error: 'db error' });
+        return res.status(403).json({ error: 'db error' });
     }
     sql = "SELECT group_password FROM kbow.group_info WHERE group_id=?";
     const passwordValue = [req.body.group_id];
