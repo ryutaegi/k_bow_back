@@ -26,9 +26,18 @@ jwt.verify(token, getKey, { algorithms: ['RS256'] }, function(err, decoded) {
   if (err) {
     // 토큰 검증 실패
     console.log(err);
+    res.status(400).json({
+      status: 'error',
+      message: 'Error during logout',
+      detail: err.message  // 에러 메시지를 상세하게 전달
+  });
   } else {
     // 토큰 검증 성공
     console.log(decoded);
+    res.status(200).json({
+      status: 'success',
+      message: 'Login out successfully'
+  });
     // 여기서 사용자 정보에 기반한 로직을 수행
   }
 });
