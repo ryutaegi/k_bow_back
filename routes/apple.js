@@ -1,8 +1,6 @@
 const express = require('express');
-const axios = require('axios');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-//const { getUserBySocialId, createUser } = require('../database/queries/userQueries');
 const maria = require('../database/connect/maria');
 const router = express.Router();
 const jwksClient = require('jwks-rsa');
@@ -18,61 +16,84 @@ function getKey(header, callback){
   });
 }
 
+function verifyToken(token) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(token, getKey, { algorithms: ['RS256'] }, (err, decoded) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(decoded);
+      }
+    });
+  });
+}
+
 router.post('/login', async (req, res) => {
-    const token = req.body.token;
-    console.log(token);
-    
-jwt.verify(token, getKey, { algorithms: ['RS256'] }, function(err, decoded) {
-  if (err) {
-    // 토큰 검증 실패
-    console.log(err);
+  const token = req.body.token;
+  const nickname = req.body.nickname;
+
+  try {
+    const decoded = await verifyToken(token);
+    console.log(decoded);
+
+    const sql = "SELECT * FROM kbow.users WHERE social_type = 3 AND social_id = ?;";
+    const result = await new Promise((resolve, reject) => {
+      maria.query(sql, [decoded.sub], (err, result) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(result);
+      });
+    });
+
+    let jwtToken;
+    if (result.length === 0) {
+      // 회원가입 처리와 JWT 발급
+      const insertSql = "INSERT INTO kbow.users(social_id, social_type, nickname, social_email, age_group, gender, image_url, agree) VALUES(?,?,?,?,?,?,?,?)";
+      const insertValues = [decoded.sub, 3, nickname || decoded.email, decoded.email, null, null, null, 0];
+      const insertResult = await new Promise((resolve, reject) => {
+        maria.query(insertSql, insertValues, (err, result) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(result);
+        });
+      });
+
+      jwtToken = jwt.sign({
+        social_id: decoded.sub,
+        social_type: 3,
+        user_id: insertResult.insertId,
+        nickname: nickname || decoded.email,
+        agree: 0
+      }, process.env.SECRET_KEY, {
+        expiresIn: '7d'
+      });
+
+      return res.json({ isNewUser: true, token: jwtToken });
+    } else {
+      // 로그인 처리와 JWT 발급
+      jwtToken = jwt.sign({
+        social_id: decoded.sub,
+        social_type: 3,
+        user_id: result[0].user_id,
+        nickname: result[0].nickname,
+        agree: result[0].agree
+      }, process.env.SECRET_KEY, {
+        expiresIn: '7d'
+      });
+
+      return res.json({ isNewUser: false, token: jwtToken });
+    }
+
+  } catch (error) {
+    console.error('Error during authentication:', error);
     res.status(400).json({
       status: 'error',
-      message: 'Error during logout',
-      detail: err.message  // 에러 메시지를 상세하게 전달
-  });
-  } else {
-    // 토큰 검증 성공
-    console.log(decoded);
-    res.status(200).json({
-      status: 'success',
-      message: 'Login out successfully'
-  });
-    // 여기서 사용자 정보에 기반한 로직을 수행
+      message: 'Authentication failed',
+      detail: error.message
+    });
   }
 });
-    
-});
-
-router.post('/logout', async (req, res) => {
-    console.log(req.body);
-    const formUrlEncoded = (x) =>
-    Object.keys(x).reduce((p, c) => p + `&${c}=${encodeURIComponent(x[c])}`, "");
-    try {
-      const response = await axios.post('https://kapi.kakao.com/v1/user/logout', formUrlEncoded({
-          target_id: req.body.social_id,
-          target_id_type: "user_id",
-        }), {
-        headers: {
-          Authorization: `KakaoAK ${process.env.SERVICE_APP_ADMIN_KEY}`,
-        }
-      });
-      console.log('Logout successful');
-      res.status(200).json({
-          status: 'success',
-          message: 'Logged out successfully'
-      });
-  } catch(error) {
-      console.log('error', error);
-      
-      res.status(400).json({
-          status: 'error',
-          message: 'Error during logout',
-          detail: error.message  // 에러 메시지를 상세하게 전달
-      });
-  }
-});
-
-
 
 module.exports = router;
