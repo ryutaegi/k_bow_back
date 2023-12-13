@@ -7,6 +7,7 @@ const moment = require('moment-timezone');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var appleRouter = require('./routes/apple');
 var kakaoRouter = require('./routes/kakao');
 var naverRouter = require('./routes/naver');
 var boardRouter = require('./routes/board/board_list');
@@ -52,6 +53,7 @@ app.use('/api/withdraw', withdrawRouter);
 
 app.use('/api/kakao', kakaoRouter);
 app.use('/api/naver', naverRouter);
+app.use('/api/apple', appleRouter);
 
 // 이 미들웨어를 사용하는 라우트 예시
 // app.get('/protected', verifyToken, (req, res) => {
