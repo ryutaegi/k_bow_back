@@ -13,6 +13,7 @@ var boardRouter = require('./routes/board/board_list');
 var shotRouter = require('./routes/shot/shot');
 var groupRouter = require('./routes/group/group')
 var agreeRouter = require('./routes/agree')
+var withdrawRouter = require('./routes/withdraw')
 var verifyToken = require('./middlewares/verifyToken');
 
 var app = express();
@@ -45,6 +46,9 @@ app.use('/api/group', groupRouter);
 
 app.use('/api/agree', verifyToken);
 app.use('/api/agree', agreeRouter);
+
+app.use('/api/withdraw', verifyToken);
+app.use('/api/withdraw', withdrawRouter);
 
 app.use('/api/kakao', kakaoRouter);
 app.use('/api/naver', naverRouter);
