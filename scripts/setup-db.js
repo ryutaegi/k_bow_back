@@ -1,19 +1,18 @@
-const mysql = require('mysql');
 require('dotenv').config();
+const mysql = require('mysql');
 
-const pool = mysql.createPool({
-    host: process.env.HOST,
-    port: parseInt(process.env.DB_PORT),
-    user: process.env.DB_USER,
-    password: process.env.PASSWORD,
-    database: process.env.DATABASE,
-    charset: 'utf8mb4',
-    connectionLimit: 10,
-    waitForConnections: true,
-    multipleStatements: true,
+const conn = mysql.createConnection({
+  host: process.env.HOST,
+  port: parseInt(process.env.DB_PORT),
+  user: process.env.DB_USER,
+  password: process.env.PASSWORD,
+  multipleStatements: true,
 });
 
 const schema = `
+CREATE DATABASE IF NOT EXISTS kbow CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE kbow;
+
 CREATE TABLE IF NOT EXISTS users (
   user_id     INT NOT NULL AUTO_INCREMENT,
   social_id   VARCHAR(255) NOT NULL,
@@ -73,13 +72,19 @@ CREATE TABLE IF NOT EXISTS group_user (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 `;
 
-// 서버 시작 시 테이블이 없으면 자동 생성
-pool.query(schema, (err) => {
+conn.connect((err) => {
+  if (err) {
+    console.error('DB 연결 실패:', err.message);
+    process.exit(1);
+  }
+  console.log('DB 연결 성공');
+  conn.query(schema, (err) => {
     if (err) {
-        console.error('DB 스키마 초기화 실패:', err.message);
-    } else {
-        console.log('DB 스키마 준비 완료');
+      console.error('스키마 생성 실패:', err.message);
+      conn.end();
+      process.exit(1);
     }
+    console.log('스키마 생성 완료!');
+    conn.end();
+  });
 });
-
-module.exports = pool;
