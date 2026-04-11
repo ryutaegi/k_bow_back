@@ -20,6 +20,7 @@ var withdrawRouter = require('./routes/withdraw');
 var verifyToken = require('./middlewares/verifyToken');
 
 var app = express();
+app.set('trust proxy', 1); // Railway 로드밸런서 뒤에서 실제 클라이언트 IP 인식
 
 moment.tz.setDefault('Asia/Seoul');
 
