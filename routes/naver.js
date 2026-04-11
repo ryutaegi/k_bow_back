@@ -76,7 +76,7 @@ router.post('/login', async (req, res) => {
       }
     } catch (error) {
       console.log('error', error);
-      res.status(400).json({ error: 'Error fetching user data from Kakao' });
+      res.status(400).json({ error: 'Error fetching user data from Naver' });
     }
 });
 

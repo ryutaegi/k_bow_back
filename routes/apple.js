@@ -91,7 +91,6 @@ router.post('/login', async (req, res) => {
     res.status(400).json({
       status: 'error',
       message: 'Authentication failed',
-      detail: error.message
     });
   }
 });
