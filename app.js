@@ -10,8 +10,7 @@ const rateLimit = require('express-rate-limit');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var appleRouter = require('./routes/apple');
-var kakaoRouter = require('./routes/kakao');
-var naverRouter = require('./routes/naver');
+var googleRouter = require('./routes/google');
 var boardRouter = require('./routes/board/board_list');
 var shotRouter = require('./routes/shot/shot');
 var groupRouter = require('./routes/group/group');
@@ -40,9 +39,8 @@ const loginLimiter = rateLimit({
   max: 10,
   message: { error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
 });
-app.use('/api/kakao/login', loginLimiter);
-app.use('/api/naver/login', loginLimiter);
 app.use('/api/apple/login', loginLimiter);
+app.use('/api/google/login', loginLimiter);
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
@@ -62,9 +60,8 @@ app.use('/api/agree', agreeRouter);
 app.use('/api/withdraw', verifyToken);
 app.use('/api/withdraw', withdrawRouter);
 
-app.use('/api/kakao', kakaoRouter);
-app.use('/api/naver', naverRouter);
 app.use('/api/apple', appleRouter);
+app.use('/api/google', googleRouter);
 
 app.use(function(req, res, next) {
   next(createError(404));

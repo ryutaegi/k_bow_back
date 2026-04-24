@@ -9,11 +9,12 @@ const router = express.Router();
 router.post('/save', async (req, res) => {
   try {
           var sql = "INSERT INTO kbow.shots(user_id, shot_date, shot_array, feedback, shot_count, target_count) VALUES(?,?,?,?,?,?)";
-          let insert_value = [req.body.user_id, req.body.date, req.body.shot, req.body.feedback, req.body.shot_count, req.body.target_count]; 
-    
+          let insert_value = [req.user.user_id, req.body.date, req.body.shot, req.body.feedback, req.body.shot_count, req.body.target_count];
+
           maria.query(sql, insert_value, (err, result) => {
             if (err) {
               console.log(err);
+              res.status(500).json({ error: 'Database Error' });
               return;
             }
             res.send(insert_value);
