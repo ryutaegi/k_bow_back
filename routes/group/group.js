@@ -8,11 +8,6 @@ const router = express.Router();
 const mariaQuery = util.promisify(maria.query).bind(maria);
 const SALT_ROUNDS = 10;
 
-// 디버그: 모든 요청 로그
-router.use((req, res, next) => {
-  console.log(`[GROUP ROUTER] ${req.method} ${req.path}`);
-  next();
-});
 
 router.get('/list', async (req, res) => {
   try {
