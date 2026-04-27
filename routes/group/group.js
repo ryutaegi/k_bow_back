@@ -222,6 +222,113 @@ router.post('/select', async (req, res) => {
   }
 });
 
+// 그룹 게시글 좋아요 토글 (목록 라우트보다 먼저 등록해야 충돌 방지)
+router.post('/board/like/:post_id', async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { post_id } = req.params;
+
+    const existing = await mariaQuery(
+      `SELECT like_id FROM kbow.group_board_like WHERE post_id = ? AND user_id = ?`,
+      [post_id, user_id]
+    );
+    if (existing.length > 0) {
+      await mariaQuery(`DELETE FROM kbow.group_board_like WHERE post_id = ? AND user_id = ?`, [post_id, user_id]);
+      return res.json({ liked: false });
+    } else {
+      await mariaQuery(`INSERT INTO kbow.group_board_like (post_id, user_id) VALUES (?, ?)`, [post_id, user_id]);
+      return res.json({ liked: true });
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+// 그룹 게시글 좋아요 수 + 내가 눌렀는지
+router.get('/board/like/:post_id', async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { post_id } = req.params;
+
+    const countResult = await mariaQuery(
+      `SELECT COUNT(*) AS like_count FROM kbow.group_board_like WHERE post_id = ?`,
+      [post_id]
+    );
+    const myLike = await mariaQuery(
+      `SELECT like_id FROM kbow.group_board_like WHERE post_id = ? AND user_id = ?`,
+      [post_id, user_id]
+    );
+    res.json({ like_count: countResult[0].like_count, liked: myLike.length > 0 });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+// 그룹 게시글 댓글 삭제 (comment 목록보다 먼저 등록)
+router.post('/board/comment/delete/:comment_id', async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { comment_id } = req.params;
+
+    const rows = await mariaQuery(
+      `SELECT user_id FROM kbow.group_board_comments WHERE comment_id = ?`,
+      [comment_id]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: '댓글이 없습니다.' });
+    if (rows[0].user_id !== user_id) return res.status(403).json({ error: '권한이 없습니다.' });
+
+    await mariaQuery(`DELETE FROM kbow.group_board_comments WHERE comment_id = ?`, [comment_id]);
+    res.json({ success: true });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+// 그룹 게시글 댓글 목록
+router.get('/board/comment/:post_id', async (req, res) => {
+  try {
+    const { post_id } = req.params;
+    const rows = await mariaQuery(
+      `SELECT comment_id, user_id, nickname, content,
+              CONVERT_TZ(created_at, 'UTC', 'Asia/Seoul') AS created_at_korean
+       FROM kbow.group_board_comments
+       WHERE post_id = ?
+       ORDER BY created_at ASC`,
+      [post_id]
+    );
+    res.json({ comments: rows });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+// 그룹 게시글 댓글 작성
+router.post('/board/comment/:post_id', async (req, res) => {
+  try {
+    const { user_id, nickname } = req.user;
+    const { post_id } = req.params;
+    const { content } = req.body;
+
+    if (!content || content.trim().length === 0)
+      return res.status(400).json({ error: '내용을 입력해주세요.' });
+    if (content.length > 500)
+      return res.status(400).json({ error: '500자 이내로 입력해주세요.' });
+
+    await mariaQuery(
+      `INSERT INTO kbow.group_board_comments (post_id, user_id, nickname, content) VALUES (?, ?, ?, ?)`,
+      [post_id, user_id, nickname, content.trim()]
+    );
+    res.json({ success: true });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
 // 그룹 게시글 목록
 router.get('/board/:group_id/:page', async (req, res) => {
   try {
@@ -293,113 +400,6 @@ router.post('/board/delete/:post_id', async (req, res) => {
     await mariaQuery(`DELETE FROM kbow.group_board_comments WHERE post_id = ?`, [post_id]);
     await mariaQuery(`DELETE FROM kbow.group_board_like WHERE post_id = ?`, [post_id]);
     await mariaQuery(`DELETE FROM kbow.group_board WHERE post_id = ?`, [post_id]);
-    res.json({ success: true });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ error: 'db error' });
-  }
-});
-
-// 그룹 게시글 좋아요 토글
-router.post('/board/like/:post_id', async (req, res) => {
-  try {
-    const { user_id } = req.user;
-    const { post_id } = req.params;
-
-    const existing = await mariaQuery(
-      `SELECT like_id FROM kbow.group_board_like WHERE post_id = ? AND user_id = ?`,
-      [post_id, user_id]
-    );
-    if (existing.length > 0) {
-      await mariaQuery(`DELETE FROM kbow.group_board_like WHERE post_id = ? AND user_id = ?`, [post_id, user_id]);
-      return res.json({ liked: false });
-    } else {
-      await mariaQuery(`INSERT INTO kbow.group_board_like (post_id, user_id) VALUES (?, ?)`, [post_id, user_id]);
-      return res.json({ liked: true });
-    }
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ error: 'db error' });
-  }
-});
-
-// 그룹 게시글 좋아요 수 + 내가 눌렀는지
-router.get('/board/like/:post_id', async (req, res) => {
-  try {
-    const { user_id } = req.user;
-    const { post_id } = req.params;
-
-    const countResult = await mariaQuery(
-      `SELECT COUNT(*) AS like_count FROM kbow.group_board_like WHERE post_id = ?`,
-      [post_id]
-    );
-    const myLike = await mariaQuery(
-      `SELECT like_id FROM kbow.group_board_like WHERE post_id = ? AND user_id = ?`,
-      [post_id, user_id]
-    );
-    res.json({ like_count: countResult[0].like_count, liked: myLike.length > 0 });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ error: 'db error' });
-  }
-});
-
-// 그룹 게시글 댓글 목록
-router.get('/board/comment/:post_id', async (req, res) => {
-  try {
-    const { post_id } = req.params;
-    const rows = await mariaQuery(
-      `SELECT comment_id, user_id, nickname, content,
-              CONVERT_TZ(created_at, 'UTC', 'Asia/Seoul') AS created_at_korean
-       FROM kbow.group_board_comments
-       WHERE post_id = ?
-       ORDER BY created_at ASC`,
-      [post_id]
-    );
-    res.json({ comments: rows });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ error: 'db error' });
-  }
-});
-
-// 그룹 게시글 댓글 작성
-router.post('/board/comment/:post_id', async (req, res) => {
-  try {
-    const { user_id, nickname } = req.user;
-    const { post_id } = req.params;
-    const { content } = req.body;
-
-    if (!content || content.trim().length === 0)
-      return res.status(400).json({ error: '내용을 입력해주세요.' });
-    if (content.length > 500)
-      return res.status(400).json({ error: '500자 이내로 입력해주세요.' });
-
-    await mariaQuery(
-      `INSERT INTO kbow.group_board_comments (post_id, user_id, nickname, content) VALUES (?, ?, ?, ?)`,
-      [post_id, user_id, nickname, content.trim()]
-    );
-    res.json({ success: true });
-  } catch (e) {
-    console.log(e);
-    res.status(500).json({ error: 'db error' });
-  }
-});
-
-// 그룹 게시글 댓글 삭제
-router.post('/board/comment/delete/:comment_id', async (req, res) => {
-  try {
-    const { user_id } = req.user;
-    const { comment_id } = req.params;
-
-    const rows = await mariaQuery(
-      `SELECT user_id FROM kbow.group_board_comments WHERE comment_id = ?`,
-      [comment_id]
-    );
-    if (rows.length === 0) return res.status(404).json({ error: '댓글이 없습니다.' });
-    if (rows[0].user_id !== user_id) return res.status(403).json({ error: '권한이 없습니다.' });
-
-    await mariaQuery(`DELETE FROM kbow.group_board_comments WHERE comment_id = ?`, [comment_id]);
     res.json({ success: true });
   } catch (e) {
     console.log(e);
