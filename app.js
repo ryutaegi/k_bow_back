@@ -16,6 +16,7 @@ var shotRouter = require('./routes/shot/shot');
 var groupRouter = require('./routes/group/group');
 var agreeRouter = require('./routes/agree');
 var withdrawRouter = require('./routes/withdraw');
+var popupRouter = require('./routes/popup');
 var verifyToken = require('./middlewares/verifyToken');
 
 var app = express();
@@ -62,6 +63,8 @@ app.use('/api/withdraw', withdrawRouter);
 
 app.use('/api/apple', appleRouter);
 app.use('/api/google', googleRouter);
+
+app.use('/api/popup', popupRouter);
 
 app.use(function(req, res, next) {
   next(createError(404));

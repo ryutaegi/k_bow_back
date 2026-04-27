@@ -7,6 +7,39 @@
 var app = require('../app');
 var debug = require('debug')('kbow-server:server');
 var http = require('http');
+var maria = require('../database/connect/maria');
+
+// 댓글 테이블 없으면 자동 생성
+maria.query(`
+  CREATE TABLE IF NOT EXISTS group_board (
+    post_id      INT AUTO_INCREMENT PRIMARY KEY,
+    group_id     INT NOT NULL,
+    user_id      INT NOT NULL,
+    nickname     VARCHAR(100) NOT NULL,
+    title        VARCHAR(200) NOT NULL,
+    content      TEXT NOT NULL,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_group (group_id)
+  ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+`, (err) => {
+  if (err) console.error('group_board 테이블 생성 실패:', err);
+  else console.log('group_board 테이블 준비 완료');
+});
+
+maria.query(`
+  CREATE TABLE IF NOT EXISTS board_comments (
+    comment_id   INT AUTO_INCREMENT PRIMARY KEY,
+    board_id     INT NOT NULL,
+    user_id      INT NOT NULL,
+    nickname     VARCHAR(100) NOT NULL,
+    content      VARCHAR(500) NOT NULL,
+    created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_board (board_id)
+  ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+`, (err) => {
+  if (err) console.error('board_comments 테이블 생성 실패:', err);
+  else console.log('board_comments 테이블 준비 완료');
+});
 
 /**
  * Get port from environment and store in Express.

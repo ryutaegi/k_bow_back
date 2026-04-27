@@ -199,8 +199,9 @@ router.post('/delete', async (req, res) => {
     if (!rows.length || rows[0].group_maker_id !== userIdFromToken) {
       return res.status(403).json({ error: '그룹 제작자만 삭제가 가능합니다' });
     }
-    await mariaQuery("DELETE FROM kbow.group_info WHERE group_id = ?;", [req.body.group_id]);
+    await mariaQuery("DELETE FROM kbow.group_board WHERE group_id = ?;", [req.body.group_id]);
     await mariaQuery("DELETE FROM kbow.group_user WHERE group_id=?;", [req.body.group_id]);
+    await mariaQuery("DELETE FROM kbow.group_info WHERE group_id = ?;", [req.body.group_id]);
     res.send({ message: 'deleted' });
   } catch (error) {
     res.status(500).json({ error: 'db error' });
@@ -215,6 +216,77 @@ router.post('/select', async (req, res) => {
     );
     res.send(result);
   } catch (error) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+// 그룹 게시글 목록
+router.get('/board/:group_id/:page', async (req, res) => {
+  try {
+    const { group_id, page } = req.params;
+    const limit = 20;
+    const offset = (page - 1) * limit;
+    const rows = await mariaQuery(
+      `SELECT post_id, user_id, nickname, title, content,
+              CONVERT_TZ(created_at, 'UTC', 'Asia/Seoul') AS created_at_korean
+       FROM kbow.group_board
+       WHERE group_id = ?
+       ORDER BY created_at DESC
+       LIMIT ? OFFSET ?`,
+      [group_id, limit, offset]
+    );
+    res.json(rows);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+// 그룹 게시글 작성 (그룹 멤버 확인)
+router.post('/board/create', async (req, res) => {
+  try {
+    const { user_id, nickname } = req.user;
+    const { group_id, title, content } = req.body;
+
+    if (!title || title.trim().length === 0) return res.status(400).json({ error: '제목을 입력해주세요.' });
+    if (!content || content.trim().length === 0) return res.status(400).json({ error: '내용을 입력해주세요.' });
+    if (title.length > 50) return res.status(400).json({ error: '제목은 50자 이내로 입력해주세요.' });
+    if (content.length > 1000) return res.status(400).json({ error: '내용은 1000자 이내로 입력해주세요.' });
+
+    const member = await mariaQuery(
+      `SELECT 1 FROM kbow.group_user WHERE group_id = ? AND user_id = ?`,
+      [group_id, user_id]
+    );
+    if (member.length === 0) return res.status(403).json({ error: '그룹 멤버만 작성할 수 있습니다.' });
+
+    await mariaQuery(
+      `INSERT INTO kbow.group_board (group_id, user_id, nickname, title, content) VALUES (?, ?, ?, ?, ?)`,
+      [group_id, user_id, nickname, title.trim(), content.trim()]
+    );
+    res.json({ success: true });
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+// 그룹 게시글 삭제 (본인만)
+router.post('/board/delete/:post_id', async (req, res) => {
+  try {
+    const { user_id } = req.user;
+    const { post_id } = req.params;
+
+    const rows = await mariaQuery(
+      `SELECT user_id FROM kbow.group_board WHERE post_id = ?`,
+      [post_id]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: '게시글이 없습니다.' });
+    if (rows[0].user_id !== user_id) return res.status(403).json({ error: '권한이 없습니다.' });
+
+    await mariaQuery(`DELETE FROM kbow.group_board WHERE post_id = ?`, [post_id]);
+    res.json({ success: true });
+  } catch (e) {
+    console.log(e);
     res.status(500).json({ error: 'db error' });
   }
 });

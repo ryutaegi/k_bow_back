@@ -71,6 +71,28 @@ CREATE TABLE IF NOT EXISTS group_user (
   group_id INT NOT NULL,
   PRIMARY KEY (user_id, group_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS popup (
+  popup_id    INT NOT NULL AUTO_INCREMENT,
+  type        ENUM('notice', 'force_update') NOT NULL DEFAULT 'notice',
+  title       VARCHAR(200) NOT NULL,
+  content     TEXT,
+  min_version VARCHAR(20),
+  is_active   TINYINT NOT NULL DEFAULT 1,
+  start_date  DATETIME,
+  end_date    DATETIME,
+  created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (popup_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS board_like (
+  like_id    INT NOT NULL AUTO_INCREMENT,
+  board_id   INT NOT NULL,
+  user_id    INT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (like_id),
+  UNIQUE KEY uq_board_user (board_id, user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 `;
 
 // 서버 시작 시 테이블이 없으면 자동 생성
