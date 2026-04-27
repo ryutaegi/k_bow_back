@@ -93,6 +93,38 @@ CREATE TABLE IF NOT EXISTS board_like (
   PRIMARY KEY (like_id),
   UNIQUE KEY uq_board_user (board_id, user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS group_board (
+  post_id    INT NOT NULL AUTO_INCREMENT,
+  group_id   INT NOT NULL,
+  user_id    INT NOT NULL,
+  nickname   VARCHAR(100),
+  title      VARCHAR(200),
+  content    TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (post_id),
+  KEY idx_group_board_group (group_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS group_board_like (
+  like_id    INT NOT NULL AUTO_INCREMENT,
+  post_id    INT NOT NULL,
+  user_id    INT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (like_id),
+  UNIQUE KEY uq_group_board_user (post_id, user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS group_board_comments (
+  comment_id INT NOT NULL AUTO_INCREMENT,
+  post_id    INT NOT NULL,
+  user_id    INT NOT NULL,
+  nickname   VARCHAR(100),
+  content    TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (comment_id),
+  KEY idx_group_board_comments_post (post_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 `;
 
 // 서버 시작 시 테이블이 없으면 자동 생성
